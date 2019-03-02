@@ -1,0 +1,42 @@
+body {
+    background-color: #333;
+    color: #DDD;
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+
+#controls {
+    padding: 15px;
+    margin: 15px;
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
+    width: 512px;
+    height: 512px;
+
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+  }
+
+#presentation {
+    width: 830px;
+    margin: 20px auto;
+    line-height: 1.75em;
+}
+
+#presentation a {
+    color: #0af;
+}
+
+footer {
+    font-size: 90%;
+    margin: 30px;
+    font-weight: normal;
+}
+
+footer a {
+    color: #ddd;
+}

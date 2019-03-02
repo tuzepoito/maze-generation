@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Maze Generation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="maze.css" type="text/css">
+</head>
+
+<body>
+
+<h1>Maze Generation</h1>
+
+<div id="controls">
+  <button id="step" onclick="doStep();">Step</button>
+  <button id="pause" onclick="togglePause();">Pause</button>
+  <select id="algorithms" onchange="reset();"></select>
+  <button onclick="reset();">Reset</button>
+</div>
+
+<canvas id="maincanvas"></canvas>
+
+<p id="presentation">
+  This is a JavaScript implementation of various maze-generating algorithms.<br />
+  These algorithms are actually derived from graph algorithms to generate
+  <a href="https://en.wikipedia.org/wiki/Minimum_spanning_tree">minimum spanning trees</a>, adapted to maze
+  generation by considering the graph as a grid of points, a path between two points of the grid as a graph edge, and
+  a wall as the absence of an edge between two nodes.<br />
+  You may choose between three algorithms:
+  <a href="https://en.wikipedia.org/wiki/Prim%27s_algorithm">Prim–Jarník algorithm</a>,
+  <a href="https://en.wikipedia.org/wiki/Kruskal%27s_algorithm">Kruskal's algorithm</a>,
+  and <a href="https://en.wikipedia.org/wiki/Depth-first_search">depth-first search</a>.
+</p>
+
+<footer>by <a href="/">Cédric "tuzepoito" Chartron</a> - 2019.</footer>
+
+<script src="random.js"></script>
+
+<script type="text/javascript">
+var width = 24;
+var height = 24;
+var intervalLength = 20;
+
+var imageWidth = width * 2 + 1;
+var imageHeight = height * 2 + 1;
+
+var image;
+var u8cimage;
+var u32image;
+var intervalID = null;
+var computeOver = false;
+var algorithm;
+
+function setPixel(u32carr, x, y, color) {
+  u32carr[y * imageWidth + x] = color;
+}
+
+function stop() {
+  window.clearInterval(intervalID);
+  intervalID = null;
+  document.getElementById('pause').textContent = "\u25B6";
+}
+
+function interval() {
+  algorithm.step();
+  if (computeOver) {
+    stop();
+    console.log("interval over");
+  }
+}
+
+function launch() {
+  intervalID = window.setInterval(interval, intervalLength);
+  document.getElementById('pause').textContent = "\u2016";
+}
+
+function togglePause() {
+  if (intervalID == null) {
+    launch();
+  } else {
+    stop();
+  }
+}
+
+function doStep() {
+  if (intervalID != null) {
+    stop();
+  }
+  algorithm.step();
+  if (computeOver) {
+    console.log("interval over");
+  }
+}
+
+function reset() {
+  if (intervalID != null) {
+    stop();
+  }
+
+  var offset = 0;
+  while (offset < u32image.length) {
+    u32image[offset++] = 0xFF000000;
+  }
+
+  computeOver = false;
+
+  algorithm = Algorithms[document.getElementById('algorithms').value];
+  algorithm.init();
+  launch();
+}
+
+window.onload = function () {
+  var canvas = document.getElementById('maincanvas');
+  canvas.width = imageWidth;
+  canvas.height = imageHeight;
+
+  var list = document.getElementById('algorithms');
+  for (algorithm in Algorithms) {
+    var el = document.createElement('option');
+    if (typeof(el.textContent) != "undefined") {
+      el.textContent = algorithm;
+    } else {
+      el.innerText = algorithm; // IE <= 8
+    }
+    list.appendChild(el);
+  }
+
+  var ctx = canvas.getContext('2d');
+
+  image = ctx.createImageData(imageWidth, imageHeight);
+  u8cimage = image.data; // Uint8Clamped
+  u32image = new Uint32Array(u8cimage.buffer);
+
+  reset();
+
+  requestAnimationFrame(function render() {
+    ctx.putImageData(image, 0, 0);
+    requestAnimationFrame(render);
+  });
+};
+</script>
+
+<script src="prim.js"></script>
+<script src="depthfirst.js"></script>
+<script src="kruskal.js"></script>
+
+</body>
+</html>
